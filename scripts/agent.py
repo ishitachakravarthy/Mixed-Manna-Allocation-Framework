@@ -56,18 +56,17 @@ class Agent:
         @param new_item: item we might exchange the og item for (from class Item)
         @return: True if utility obtained by exchanging item is the same or more, False otherwise.
         '''
-        if og_item.item_id==new_item.item_id:
+        if og_item==new_item:
             return False
 
         for i in range(len(bundle)):
-            if bundle[i].item_id == new_item.item_id:
+            if bundle[i] == new_item:
                 return False
             
-
         T0=bundle.copy()
         index=[]
         for i in range(len(T0)):
-            if T0[i].item_id == og_item.item_id:
+            if T0[i] == og_item:
                 index.append(i)
         if len(index)==0:
             return False
