@@ -3,6 +3,7 @@ import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
 
+
 def initialize_allocation_matrix(items: list[str], agents: list[Agent]):
     """Initialize allocation matrix.
 
@@ -42,6 +43,7 @@ def initialize_exchange_graph(items: list[str]):
         exchange_graph.add_edge(item, "t")
     return exchange_graph
 
+
 def add_agent_to_exchange_graph(
     X: type[np.ndarray],
     G: type[nx.Graph],
@@ -64,7 +66,7 @@ def add_agent_to_exchange_graph(
         G (type[nx.Graph]): Updated exchange graph
     """
     G.add_node("s")
-    bundle = [items[index] for index, i in enumerate(X[:, agent_picked]) if i!=0]
+    bundle = [items[index] for index, i in enumerate(X[:, agent_picked]) if i != 0]
     agent = agents[agent_picked]
     for g in agent.desired_items:
         if (
@@ -73,7 +75,6 @@ def add_agent_to_exchange_graph(
         ):
             G.add_edge("s", g)
     return G
-
 
 
 def find_shortest_path(G: type[nx.Graph], start: str, end: str):
@@ -97,8 +98,6 @@ def find_shortest_path(G: type[nx.Graph], start: str, end: str):
         return False
 
 
-
-
 def update_allocation(
     X: type[np.ndarray],
     agents: list[Agent],
@@ -113,7 +112,7 @@ def update_allocation(
     Args:
         X (type[np.ndarray]): allocation matrix
         agents (list[Agent]): List of agents from class Agent
-        items (list[str]): List of items 
+        items (list[str]): List of items
         path_og (list[str]): shortest path, list of items
         agent_picked (int): index of the agent currently playing
 
@@ -130,14 +129,15 @@ def update_allocation(
         last_item = items.index(path.pop(len(path) - 1))
         if len(path) > 0:
             next_to_last_item = items.index(path[-1])
-            current_agent = [index for index,i in enumerate(X[next_to_last_item]) if i==1][0]
+            current_agent = [
+                index for index, i in enumerate(X[next_to_last_item]) if i == 1
+            ][0]
             agents_involved.append(current_agent)
             X[last_item, current_agent] = 1
             X[next_to_last_item, current_agent] = 0
         else:
             X[last_item, agent_picked] = 1
     return X, agents_involved
-
 
 
 def update_exchange_graph(
@@ -164,13 +164,15 @@ def update_exchange_graph(
         G (type[nx.Graph]): updated exchange graph
     """
     path = path_og.copy()
-    G.remove_edges_from([edge for edge in [e for e in G.edges()] if edge[0] in path[1:-1]])
+    G.remove_edges_from(
+        [edge for edge in [e for e in G.edges()] if edge[0] in path[1:-1]]
+    )
     for agent_index in agents_involved:
-        agent=agents[agent_index]
-        bundle = [items[index] for index, i in enumerate(X[:, agent_index]) if i!=0]
+        agent = agents[agent_index]
+        bundle = [items[index] for index, i in enumerate(X[:, agent_index]) if i != 0]
         for item_1 in bundle:
             for item_2 in agent.desired_items:
-                exchangeable= agent.exchange_contribution(bundle, item_1, item_2)
+                exchangeable = agent.exchange_contribution(bundle, item_1, item_2)
                 if exchangeable:
                     if not G.has_edge(item_1, item_2):
                         G.add_edge(item_1, item_2)
@@ -178,7 +180,6 @@ def update_exchange_graph(
                     if G.has_edge(item_1, item_2):
                         G.remove_edge(item_1, item_2)
     return G
-
 
 
 def yankee_swap(
@@ -190,7 +191,7 @@ def yankee_swap(
 
     Args:
         agents (list[BaseAgent]): List of agents from class Agent
-        items (list[ScheduleItem]): List of items 
+        items (list[ScheduleItem]): List of items
         plot_exchange_graph (bool, optional): Defaults to False. Change to True to display exchange graph plot after every modification to it.
 
     Returns:
