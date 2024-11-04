@@ -14,22 +14,22 @@ print(f"Agent 2 valuation of {bundle}: {agent2.valuation(bundle)}")
 print(f"Agent 3 valuation of {bundle}: {agent3.valuation(bundle)}")
 
 print(
-    f"Agent 1 marginal contribution of o2 to {bundle}: {agent1.marginal_contribution(bundle,'o1')}"
-)
-print(
     f"Agent 1 marginal contribution of o2 to {bundle}: {agent1.marginal_contribution(bundle,'o2')}"
 )
 print(
-    f"Agent 1 marginal contribution of o2 to {bundle}: {agent1.marginal_contribution(bundle,'o4')}"
+    f"Agent 2 marginal contribution of o2 to {bundle}: {agent2.marginal_contribution(bundle,'o2')}"
+)
+print(
+    f"Agent 3 marginal contribution of o2 to {bundle}: {agent3.marginal_contribution(bundle,'o4')}"
 )
 
 
 print(
-    f"Agent 1 willing to exchange o1 for o2 with bundle {bundle}: {agent1.exchange_contribution(bundle,'o1','o3')}"
+    f"Agent 1 willing to exchange o1 for o2 with bundle {bundle}: {agent1.exchange_contribution(bundle,'o1','o2')}"
 )
 print(
     f"Agent 2 willing to exchange o3 for o2 with bundle {bundle}: {agent2.exchange_contribution(bundle,'o3','o2')}"
 )
 print(
-    f"Agent 2 willing to exchange o3 for o2 with bundle {bundle}: {agent3.exchange_contribution(bundle,'o3','o2')}"
+    f"Agent 3 willing to exchange o3 for o2 with bundle {bundle}: {agent3.exchange_contribution(bundle,'o3','o2')}"
 )
