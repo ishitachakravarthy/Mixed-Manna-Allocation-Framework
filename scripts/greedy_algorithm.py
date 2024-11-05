@@ -1,5 +1,5 @@
 import numpy as np
-
+from allocation import * 
 items = ["o1", "o2", "o3", "o4", "o5", "o6", "o7", "o8", "o9"]
 agents = [1, 2, 3]
 c = 3
