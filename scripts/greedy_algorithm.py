@@ -37,7 +37,6 @@ def find_max_utility_agent(agents, X_c_matr, X_0_matr, X__1_matr):
             max_agent = agent
     return max_agent, max_value
 
-
 def allocate_remaining_items_matr(X_c_matr, X_0_matr, X__1_matr):
 
     # Create a list of unallocated items
