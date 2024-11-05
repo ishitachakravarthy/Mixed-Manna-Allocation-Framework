@@ -1,5 +1,5 @@
 import numpy as np
-
+from allocation import * 
 items = ["o1", "o2", "o3", "o4", "o5", "o6", "o7", "o8", "o9"]
 agents = [1, 2, 3]
 c = 3
@@ -36,7 +36,6 @@ def find_max_utility_agent(agents, X_c_matr, X_0_matr, X__1_matr):
             max_value = value
             max_agent = agent
     return max_agent, max_value
-
 
 def allocate_remaining_items_matr(X_c_matr, X_0_matr, X__1_matr):
 
