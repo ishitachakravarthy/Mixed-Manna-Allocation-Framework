@@ -100,6 +100,8 @@ def find_shortest_path(G: type[nx.Graph], start: str, end: str):
 
 def update_allocation(
     X: type[np.ndarray],
+    X_0_matr: type[np.ndarray],
+    c_flag: int,
     agents: list[Agent],
     items: list[str],
     path_og: list[int],
@@ -125,6 +127,12 @@ def update_allocation(
     last_item = items.index(path[-1])
     agents_involved = [agent_picked]
     X[last_item, len(agents)] -= 1
+
+    if c_flag==1:
+        agent_x0 = list((X_0_matr[last_item] > 0).nonzero()[0])[0]
+        X_0_matr[last_item, agent_x0] -= 1
+        X_0_matr[last_item, len(agents)] = 1
+
     while len(path) > 0:
         last_item = items.index(path.pop(len(path) - 1))
         if len(path) > 0:
@@ -137,11 +145,13 @@ def update_allocation(
             X[next_to_last_item, current_agent] = 0
         else:
             X[last_item, agent_picked] = 1
-    return X, agents_involved
+    return X, X_0_matr, agents_involved
 
 
 def update_exchange_graph(
     X: type[np.ndarray],
+    X_0_matr: type[np.ndarray],
+    c_flag,
     G: type[nx.Graph],
     agents: list[Agent],
     items: list[str],
@@ -175,7 +185,11 @@ def update_exchange_graph(
                 exchangeable = agent.exchange_contribution(bundle, item_1, item_2)
                 if exchangeable:
                     if not G.has_edge(item_1, item_2):
-                        G.add_edge(item_1, item_2)
+                        weight = 1
+                        if c_flag==1:
+                            if X_0_matr[items.index(item_2), agent_index] == 1:
+                                weight = 0.5
+                        G.add_edge(item_1, item_2, weight=weight)
                 else:
                     if G.has_edge(item_1, item_2):
                         G.remove_edge(item_1, item_2)
@@ -220,8 +234,8 @@ def yankee_swap(
             players.remove(agent_picked)
             utility_vector[agent_picked] = float("inf")
         else:
-            X, agents_involved = update_allocation(X, agents, items, path, agent_picked)
-            G = update_exchange_graph(X, G, agents, items, path, agents_involved)
+            X, _, agents_involved = update_allocation(X, X,0, agents, items, path, agent_picked)
+            G = update_exchange_graph(X, X,0, G, agents, items, path, agents_involved)
             utility_vector[agent_picked] += 1
             if plot_exchange_graph:
                 nx.draw(G, with_labels=True)

@@ -31,9 +31,6 @@ def yankee_swap_c(
     count = 0
     while len(players) > 0:
         print("Iteration: %d" % count, end="\r")
-        print(f"x_c \n {X_c_matr}")
-        print(f"x_0 \n {X_0_matr}")
-
         count += 1
         agent_picked = np.argmin(utility_vector)
         G = add_agent_to_exchange_graph(X_c_matr, G, agents, items, agent_picked)
@@ -50,11 +47,11 @@ def yankee_swap_c(
             players.remove(agent_picked)
             utility_vector[agent_picked] = float("inf")
         else:
-            X_c_matr, X_0_matr, agents_involved = update_allocation_chore(
-                X_c_matr, X_0_matr, agents, items, path, agent_picked
+            X_c_matr, X_0_matr, agents_involved = update_allocation(
+                X_c_matr, X_0_matr, 1, agents, items, path, agent_picked
             )
-            G = update_exchange_graph_weighted(
-                X_c_matr, X_0_matr, G, agents, items, path, agents_involved
+            G = update_exchange_graph(
+                X_c_matr, X_0_matr,1, G, agents, items, path, agents_involved
             )
             utility_vector[agent_picked] += 1
             if plot_exchange_graph:
@@ -84,6 +81,12 @@ X_0_matr[:, 1] = [0, 0, 1, 1, 0, 0, 0, 0, 0]
 X_0_matr[:, 2] = [0, 0, 0, 0, 1, 1, 1, 1, 0]
 X_0_matr[:, 3] = [0, 0, 0, 0, 0, 0, 0, 0, 0]
 
-X = yankee_swap_c(
-    agents=agents, items=items, X_c_matr=X_c_matr, X_0_matr=X_0_matr,plot_exchange_graph=True
+X_c_matr, X_0_matr = yankee_swap_c(
+    agents=agents,
+    items=items,
+    X_c_matr=X_c_matr,
+    X_0_matr=X_0_matr,
+    plot_exchange_graph=False,
 )
+
+print(X_c_matr, X_0_matr)
