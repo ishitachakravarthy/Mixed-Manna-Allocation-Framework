@@ -4,7 +4,8 @@ import networkx as nx
 import matplotlib.pyplot as plt
 from allocation import *
 
-from agent_chore import  *
+from agent_chore import *
+
 
 def yankee_swap_c(
     agents: list[Agent],
@@ -33,10 +34,10 @@ def yankee_swap_c(
         print("Iteration: %d" % count, end="\r")
         count += 1
         agent_picked = np.argmin(utility_vector)
-        G = add_agent_to_exchange_graph(X_c_matr,2, G, agents, items, agent_picked)
+        G = add_agent_to_exchange_graph(X_c_matr, 2, G, agents, items, agent_picked)
         if plot_exchange_graph:
             pos = nx.spring_layout(G, seed=7)
-            nx.draw(G,pos, with_labels=True)
+            nx.draw(G, pos, with_labels=True)
             edge_labels = nx.get_edge_attributes(G, "weight")
             nx.draw_networkx_edge_labels(G, pos, edge_labels)
             plt.show()
@@ -51,14 +52,13 @@ def yankee_swap_c(
                 X_c_matr, X_0_matr, 1, agents, items, path, agent_picked
             )
             G = update_exchange_graph(
-                X_c_matr, X_0_matr,1, G, agents, items, path, agents_involved
+                X_c_matr, X_0_matr, 1, G, agents, items, path, agents_involved
             )
             utility_vector[agent_picked] += 1
             if plot_exchange_graph:
                 pos = nx.spring_layout(G, seed=7)
-                nx.draw(G,pos, with_labels=True)
+                nx.draw(G, pos, with_labels=True)
                 edge_labels = nx.get_edge_attributes(G, "weight")
                 nx.draw_networkx_edge_labels(G, pos, edge_labels)
                 plt.show()
     return X_c_matr, X_0_matr
-

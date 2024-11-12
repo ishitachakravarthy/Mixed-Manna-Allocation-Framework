@@ -1,5 +1,6 @@
 import numpy as np
-from allocation import * 
+from allocation import *
+
 # items = ["o1", "o2", "o3", "o4", "o5", "o6", "o7", "o8", "o9"]
 # agents = [1, 2, 3]
 # c = 3
@@ -17,7 +18,7 @@ from allocation import *
 # X_0_matr[:, 3] = [0, 0, 1, 1, 1, 1, 1, 1, 1]
 
 
-def find_current_utilities(agent,c, X_c_matr, X_0_matr, X__1_matr):
+def find_current_utilities(agent, c, X_c_matr, X_0_matr, X__1_matr):
     #  Given an agent find the utility of the agent
     value = (
         np.sum(X_c_matr[:, agent]) * c
@@ -31,11 +32,12 @@ def find_max_utility_agent(agents, c, X_c_matr, X_0_matr, X__1_matr):
     max_agent = None
     max_value = -float("inf")
     for agent in range(len(agents)):
-        value = find_current_utilities(agent,c,  X_c_matr, X_0_matr, X__1_matr)
+        value = find_current_utilities(agent, c, X_c_matr, X_0_matr, X__1_matr)
         if value >= max_value:
             max_value = value
             max_agent = agent
     return max_agent, max_value
+
 
 def allocate_remaining_items_matr(agents, c, X_c_matr, X_0_matr, X__1_matr):
 
@@ -47,7 +49,7 @@ def allocate_remaining_items_matr(agents, c, X_c_matr, X_0_matr, X__1_matr):
     while unallocated_items:
         # Find the agent with maximum utility with maximum index
         max_agent, max_value = find_max_utility_agent(
-            agents,c,  X_c_matr, X_0_matr, X__1_matr
+            agents, c, X_c_matr, X_0_matr, X__1_matr
         )
 
         # Pick and remove an arbitrary item from the unallocated items

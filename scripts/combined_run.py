@@ -38,7 +38,7 @@ agents.append(
         cap=100,
         desired_items=desired_items_0[1],
         desired_items_c=desired_items_c[1],
-        c_value=c_value
+        c_value=c_value,
     )
 )
 

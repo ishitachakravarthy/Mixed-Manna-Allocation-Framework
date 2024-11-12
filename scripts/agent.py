@@ -12,7 +12,7 @@ class Agent:
         self.desired_items = desired_items
         self.desired_items_c = desired_items_c
         self.cap = cap
-        self.c_value=c_value
+        self.c_value = c_value
 
     def valuation(self, bundle):
         """
@@ -34,7 +34,7 @@ class Agent:
                 slots.add(item)
             elif item in self.desired_items_c:
                 slots_c.add(item)
-        return min(len(slots)+self.c_value*(len(slots_c)), self.cap)
+        return min(len(slots) + self.c_value * (len(slots_c)), self.cap)
 
     def marginal_contribution(self, bundle, item):
         """
