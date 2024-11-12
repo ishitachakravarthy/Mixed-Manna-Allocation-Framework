@@ -1,5 +1,6 @@
 class Agent:
-    def __init__(self, id, desired_items, cap):
+
+    def __init__(self, id, desired_items, desired_items_c, cap, c_value):
         """
         Object Agent has three parameters:
         - id: Agent id (not really necessary or used at the moment, might be useful when assigning priority for example)
@@ -9,7 +10,9 @@ class Agent:
         """
         self.id = id
         self.desired_items = desired_items
+        self.desired_items_c = desired_items_c
         self.cap = cap
+        self.c_value=c_value
 
     def valuation(self, bundle):
         """
@@ -25,10 +28,13 @@ class Agent:
         #     if items[g].item_id not in self.desired_items:
         #         T.remove(g)
         slots = set()
+        slots_c = set()
         for item in bundle:
             if item in self.desired_items:
                 slots.add(item)
-        return min(len(slots), self.cap)
+            elif item in self.desired_items_c:
+                slots_c.add(item)
+        return min(len(slots)+self.c_value*(len(slots_c)), self.cap)
 
     def marginal_contribution(self, bundle, item):
         """

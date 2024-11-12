@@ -33,7 +33,7 @@ def yankee_swap_c(
         print("Iteration: %d" % count, end="\r")
         count += 1
         agent_picked = np.argmin(utility_vector)
-        G = add_agent_to_exchange_graph(X_c_matr, G, agents, items, agent_picked)
+        G = add_agent_to_exchange_graph(X_c_matr,2, G, agents, items, agent_picked)
         if plot_exchange_graph:
             pos = nx.spring_layout(G, seed=7)
             nx.draw(G,pos, with_labels=True)
@@ -62,31 +62,3 @@ def yankee_swap_c(
                 plt.show()
     return X_c_matr, X_0_matr
 
-
-items = ["o1", "o2", "o3", "o4", "o5", "o6", "o7", "o8", "o9"]
-
-agent1 = Agent(id="0", cap=8, desired_items=["o2", "o9"])
-agent2 = Agent(id="1", cap=8, desired_items=["o1", "o3"])
-agent3 = Agent(id="2", cap=8, desired_items=["o2"])
-
-agents = [agent1, agent2, agent3]
-
-X_c_matr = initialize_allocation_matrix(items, agents)
-X_0_matr = initialize_allocation_matrix(items, agents)
-X__1_matr = initialize_allocation_matrix(items, agents)
-
-# Set example allocation for testing
-X_0_matr[:, 0] = [1, 1, 0, 0, 0, 0, 0, 0, 1]
-X_0_matr[:, 1] = [0, 0, 1, 1, 0, 0, 0, 0, 0]
-X_0_matr[:, 2] = [0, 0, 0, 0, 1, 1, 1, 1, 0]
-X_0_matr[:, 3] = [0, 0, 0, 0, 0, 0, 0, 0, 0]
-
-X_c_matr, X_0_matr = yankee_swap_c(
-    agents=agents,
-    items=items,
-    X_c_matr=X_c_matr,
-    X_0_matr=X_0_matr,
-    plot_exchange_graph=False,
-)
-
-print(X_c_matr, X_0_matr)

@@ -46,6 +46,7 @@ def initialize_exchange_graph(items: list[str]):
 
 def add_agent_to_exchange_graph(
     X: type[np.ndarray],
+    c:int,
     G: type[nx.Graph],
     agents: list[Agent],
     items: list[str],
@@ -68,12 +69,12 @@ def add_agent_to_exchange_graph(
     G.add_node("s")
     bundle = [items[index] for index, i in enumerate(X[:, agent_picked]) if i != 0]
     agent = agents[agent_picked]
-    for g in agent.desired_items:
+    for g in items:
         if (
-            g not in bundle
-            and agents[agent_picked].marginal_contribution(bundle, g) == 1
-        ):
-            G.add_edge("s", g)
+                g not in bundle
+                and agents[agent_picked].marginal_contribution(bundle, g) == c
+            ):
+                G.add_edge("s", g)
     return G
 
 
@@ -181,7 +182,7 @@ def update_exchange_graph(
         agent = agents[agent_index]
         bundle = [items[index] for index, i in enumerate(X[:, agent_index]) if i != 0]
         for item_1 in bundle:
-            for item_2 in agent.desired_items:
+            for item_2 in items:
                 exchangeable = agent.exchange_contribution(bundle, item_1, item_2)
                 if exchangeable:
                     if not G.has_edge(item_1, item_2):
@@ -222,7 +223,7 @@ def yankee_swap(
         print("Iteration: %d" % count, end="\r")
         count += 1
         agent_picked = np.argmin(utility_vector)
-        G = add_agent_to_exchange_graph(X, G, agents, items, agent_picked)
+        G = add_agent_to_exchange_graph(X, 1,G, agents, items, agent_picked)
         if plot_exchange_graph:
             nx.draw(G, with_labels=True)
             plt.show()
