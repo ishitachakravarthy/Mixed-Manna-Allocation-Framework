@@ -14,7 +14,7 @@ def yankee_swap_c(
     c_value: int,
     plot_exchange_graph: bool = False,
 ):
-    """General Yankee swap allocation algorithm.
+    """Pareto improving paths allocation algorithm with updates to allocate c and 0 valued items
 
     Args:
         agents (list[BaseAgent]): List of agents from class Agent
@@ -55,6 +55,7 @@ def yankee_swap_c(
 
         path = find_shortest_path(G, "s", "t")
         G.remove_node("s")
+        
         if path == False:
             players.remove(agent_picked)
             utility_vector[agent_picked] = float("inf")

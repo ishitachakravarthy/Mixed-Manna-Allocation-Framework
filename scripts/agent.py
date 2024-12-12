@@ -42,7 +42,7 @@ class Agent:
 
         @param bundle: list of items (from class Item)
         @param item: marginal item (from class Item)
-        @return: marginal utility obtained by adding item to bundle (either 0 or 1).
+        @return: marginal utility obtained by adding item to bundle (either 0, 1 or c).
         """
 
         T = bundle.copy()
