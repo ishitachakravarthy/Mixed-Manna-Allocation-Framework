@@ -46,11 +46,11 @@ def initialize_exchange_graph(items: list[str]):
 
 def add_agent_to_exchange_graph(
     X: type[np.ndarray],
-    c: int,
     G: type[nx.Graph],
     agents: list[Agent],
     items: list[str],
     agent_picked: int,
+    c_value: int,
 ):
     """Add picked agent to the exchange graph.
 
@@ -62,6 +62,7 @@ def add_agent_to_exchange_graph(
         agents (list[Agent]): List of agents from class Agent
         items (list[str]): List of items
         agent_picked (int): index of the agent currently playing
+        c_value (int): Value of c for goods
 
     Returns:
         G (type[nx.Graph]): Updated exchange graph
@@ -72,7 +73,7 @@ def add_agent_to_exchange_graph(
     for g in items:
         if (
             g not in bundle
-            and agents[agent_picked].marginal_contribution(bundle, g) == c
+            and agents[agent_picked].marginal_contribution(bundle, g) == c_value
         ):
             G.add_edge("s", g)
     return G
@@ -102,11 +103,11 @@ def find_shortest_path(G: type[nx.Graph], start: str, end: str):
 def update_allocation(
     X: type[np.ndarray],
     X_0_matr: type[np.ndarray],
-    c_flag: int,
     agents: list[Agent],
     items: list[str],
     path_og: list[int],
     agent_picked: int,
+    c_flag: int,
 ):
     """Update allocation matrix.
 
@@ -118,9 +119,11 @@ def update_allocation(
         items (list[str]): List of items
         path_og (list[str]): shortest path, list of items
         agent_picked (int): index of the agent currently playing
+        c_value (int): Value of c for goods
 
     Returns:
         X (type[np.ndarray]): updated allocation matrix
+        X_0_matr (type[np.ndarray]): updated allocation matrix of 0 valued items
         agents_involved (list[int]): indices of the agents involved in the transfer path
     """
     path = path_og.copy()
@@ -152,12 +155,12 @@ def update_allocation(
 def update_exchange_graph(
     X: type[np.ndarray],
     X_0_matr: type[np.ndarray],
-    c_flag,
     G: type[nx.Graph],
     agents: list[Agent],
     items: list[str],
     path_og: list[int],
     agents_involved: list[int],
+    c_flag: int,
 ):
     """Update the exchange graph after the transfers made.
 
@@ -165,11 +168,13 @@ def update_exchange_graph(
 
     Args:
         X (type[np.ndarray]): allocation matrix
+        X_0_matr (type[np.ndarray]): allocation matrix of 0 valued items
         G (type[nx.Graph]): exchange graph
         agents (list[BaseAgent]): List of agents from class BaseAgent
         items (list[ScheduleItem]): List of items from class BaseItem
         path_og (list[int]): shortest path, list of items indices
         agents_involved (list[int]): list of the indices of the agents invovled in the transfer path
+        c_value (int): Value of c for goods
 
     Returns:
         G (type[nx.Graph]): updated exchange graph
@@ -199,7 +204,7 @@ def update_exchange_graph(
 
 def update_path(agents, items, items_wanted, X_c_matr, X_0_matr, G, agent_idx, i):
     # Add new sync node
-    X_c_col=X_c_matr[:][agent_idx]
+    X_c_col = X_c_matr[:][agent_idx]
     X_c_col_flat = X_c_col.flatten()
     items_pos = np.where(X_c_col_flat == 1)[0]
     print(items_pos)
@@ -209,7 +214,7 @@ def update_path(agents, items, items_wanted, X_c_matr, X_0_matr, G, agent_idx, i
 
     G.add_node("a")
     for item in items_wanted:
-        G.add_edge("a",item)
+        G.add_edge("a", item)
 
     path = find_shortest_path(G, "a", "x")
     # Update exchange graph
@@ -238,24 +243,21 @@ def update_path(agents, items, items_wanted, X_c_matr, X_0_matr, G, agent_idx, i
     return X_c_matr, X_0_matr, G
 
 
-def path_augmentation(agents,items, X_c_matr, X_0_matr, G):
+def path_augmentation(agents, items, X_c_matr, X_0_matr, G):
     if True:
         pos = nx.spring_layout(G, seed=7)
         nx.draw(G, pos, with_labels=True)
         edge_labels = nx.get_edge_attributes(G, "weight")
         nx.draw_networkx_edge_labels(G, pos, edge_labels)
         plt.show()
-    valuations_c=2*np.sum(X_c_matr, axis=0)[:-1]
+    valuations_c = 2 * np.sum(X_c_matr, axis=0)[:-1]
     for i in range(len(agents)):
         # find bundle of items wanted
-        items_wanted=set()
+        items_wanted = set()
         agent = agents[i]
         bundle = [items[index] for index, i in enumerate(X_c_matr[:, i]) if i != 0]
         for g in items:
-            if (
-                g not in bundle
-                and agents[i].marginal_contribution(bundle, g) == 2
-            ):
+            if g not in bundle and agents[i].marginal_contribution(bundle, g) == 2:
                 items_wanted.add(g)
         # print(i, X_c_matr,items_wanted)
         # print(valuations_c)
@@ -263,10 +265,10 @@ def path_augmentation(agents,items, X_c_matr, X_0_matr, G):
             item_idx = items.index(item)
             agent_with_item_arr = X_c_matr[item_idx][:-1]
             agent_idx = np.where(agent_with_item_arr == 1)[0][0]
-            if valuations_c[agent_idx]+1>valuations_c[i]:
+            if valuations_c[agent_idx] + 1 > valuations_c[i]:
                 # Run exchange path
-                X_c_matr, X_0_matr, G= update_path(
-                    agents, items,items_wanted, X_c_matr, X_0_matr, G, agent_idx, i
+                X_c_matr, X_0_matr, G = update_path(
+                    agents, items, items_wanted, X_c_matr, X_0_matr, G, agent_idx, i
                 )
 
     return X_c_matr, X_0_matr, G

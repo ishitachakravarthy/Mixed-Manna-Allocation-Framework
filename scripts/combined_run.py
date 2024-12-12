@@ -80,8 +80,8 @@ X_c_matr, X_0_matr = yankee_swap_c(
     items=items,
     X_c_matr=X_c_matr,
     X_0_matr=X_0_matr,
+    c_value=c_value,
     plot_exchange_graph=False,
-    # c_value=c_value,
 )
 # print(f"Xc: {X_c_matr}")
 # print(f"X0: {X_0_matr}")
