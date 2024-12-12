@@ -197,50 +197,76 @@ def update_exchange_graph(
     return G
 
 
-def yankee_swap(
-    agents: list[Agent],
-    items: list[str],
-    plot_exchange_graph: bool = False,
-):
-    """General Yankee swap allocation algorithm.
+def update_path(agents, items, items_wanted, X_c_matr, X_0_matr, G, agent_idx, i):
+    # Add new sync node
+    X_c_col=X_c_matr[:][agent_idx]
+    X_c_col_flat = X_c_col.flatten()
+    items_pos = np.where(X_c_col_flat == 1)[0]
+    print(items_pos)
+    G.add_node("x")
+    for item in items_pos:
+        G.add_edge(item, "x")
 
-    Args:
-        agents (list[BaseAgent]): List of agents from class Agent
-        items (list[ScheduleItem]): List of items
-        plot_exchange_graph (bool, optional): Defaults to False. Change to True to display exchange graph plot after every modification to it.
+    G.add_node("a")
+    for item in items_wanted:
+        G.add_edge("a",item)
 
-    Returns:
-        X (type[np.ndarray]): allocation matrix
-    """
-    N = len(items)
-    M = len(agents)
-    players = list(range(M))
-    X = initialize_allocation_matrix(items, agents)
-    G = initialize_exchange_graph(items)
-    utility_vector = np.zeros([M])
-    count = 0
-    while len(players) > 0:
-        print("Iteration: %d" % count, end="\r")
-        count += 1
-        agent_picked = np.argmin(utility_vector)
-        G = add_agent_to_exchange_graph(X, 1, G, agents, items, agent_picked)
-        if plot_exchange_graph:
-            nx.draw(G, with_labels=True)
-            plt.show()
+    path = find_shortest_path(G, "a", "x")
+    # Update exchange graph
+    if path == False:
+        print(path)
+        G.remove_node("a")
+        G.remove_node("x")
+        return X_c_matr, X_0_matr, G
+    # else:
+    #     X_c_matr, X_0_matr, agents_involved = update_allocation(
+    #         X_c_matr, X_0_matr, 1, agents, items, path
+    #     )
+    #     G = update_exchange_graph(
+    #             X_c_matr, X_0_matr, 1, G, agents, items, path, agents_involved
+    #         )
 
-        path = find_shortest_path(G, "s", "t")
-        G.remove_node("s")
+    if True:
+        pos = nx.spring_layout(G, seed=7)
+        nx.draw(G, pos, with_labels=True)
+        edge_labels = nx.get_edge_attributes(G, "weight")
+        nx.draw_networkx_edge_labels(G, pos, edge_labels)
+        plt.show()
 
-        if path == False:
-            players.remove(agent_picked)
-            utility_vector[agent_picked] = float("inf")
-        else:
-            X, _, agents_involved = update_allocation(
-                X, X, 0, agents, items, path, agent_picked
-            )
-            G = update_exchange_graph(X, X, 0, G, agents, items, path, agents_involved)
-            utility_vector[agent_picked] += 1
-            if plot_exchange_graph:
-                nx.draw(G, with_labels=True)
-                plt.show()
-    return X
+    G.remove_node("a")
+    G.remove_node("x")
+    return X_c_matr, X_0_matr, G
+
+
+def path_augmentation(agents,items, X_c_matr, X_0_matr, G):
+    if True:
+        pos = nx.spring_layout(G, seed=7)
+        nx.draw(G, pos, with_labels=True)
+        edge_labels = nx.get_edge_attributes(G, "weight")
+        nx.draw_networkx_edge_labels(G, pos, edge_labels)
+        plt.show()
+    valuations_c=2*np.sum(X_c_matr, axis=0)[:-1]
+    for i in range(len(agents)):
+        # find bundle of items wanted
+        items_wanted=set()
+        agent = agents[i]
+        bundle = [items[index] for index, i in enumerate(X_c_matr[:, i]) if i != 0]
+        for g in items:
+            if (
+                g not in bundle
+                and agents[i].marginal_contribution(bundle, g) == 2
+            ):
+                items_wanted.add(g)
+        # print(i, X_c_matr,items_wanted)
+        # print(valuations_c)
+        for item in items_wanted:
+            item_idx = items.index(item)
+            agent_with_item_arr = X_c_matr[item_idx][:-1]
+            agent_idx = np.where(agent_with_item_arr == 1)[0][0]
+            if valuations_c[agent_idx]+1>valuations_c[i]:
+                # Run exchange path
+                X_c_matr, X_0_matr, G= update_path(
+                    agents, items,items_wanted, X_c_matr, X_0_matr, G, agent_idx, i
+                )
+
+    return X_c_matr, X_0_matr, G

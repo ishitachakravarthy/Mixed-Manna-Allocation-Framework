@@ -30,11 +30,11 @@ class Agent:
         slots = set()
         slots_c = set()
         for item in bundle:
-            if item in self.desired_items:
-                slots.add(item)
-            elif item in self.desired_items_c:
+            if item in self.desired_items_c:
                 slots_c.add(item)
-        return min(len(slots) + self.c_value * (len(slots_c)), self.cap)
+            elif item in self.desired_items:
+                slots.add(item)
+        return min(len(slots) +(self.c_value * len(slots_c)), self.cap)
 
     def marginal_contribution(self, bundle, item):
         """
