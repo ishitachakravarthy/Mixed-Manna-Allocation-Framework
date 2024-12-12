@@ -4,7 +4,6 @@ import networkx as nx
 import matplotlib.pyplot as plt
 from allocation import *
 
-from agent_chore import *
 
 def yankee_swap(
     agents: list[Agent],
