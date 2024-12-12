@@ -2,16 +2,13 @@ from agent import Agent
 import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
-from allocation import *
-from chore_allocation import *
-from agent_chore import *
-import time
 
 from allocation import *
-from chore_allocation import *
-from agent_chore import *
-import time
+from yankee_swap import *
+from pareto_paths import *
 from greedy_algorithm import *
+import time
+
 
 items = []
 
@@ -19,9 +16,17 @@ for i in range(500):
     items.append(str(i))
 
 agents = []
-c_value=2
+c_value = 2
 for i in range(10):
-    agents.append(Agent(id=str(i), cap=100, desired_items=items, desired_items_c=items,c_value=c_value))
+    agents.append(
+        Agent(
+            id=str(i),
+            cap=100,
+            desired_items=items,
+            desired_items_c=items,
+            c_value=c_value,
+        )
+    )
 
 
 X_c_matr = initialize_allocation_matrix(items, agents)
