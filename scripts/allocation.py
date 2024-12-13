@@ -286,8 +286,8 @@ def path_augmentation(agents, items, X_c_matr, X_0_matr, G,c_value):
             agent_idx = np.where(agent_with_item_arr == 1)[0][0]
             # print(i, agent_idx)
             if (
-                valuations_c[agent_idx] + 1 > valuations_c[i]
-                or (valuations_c[agent_idx] + 1 == valuations_c[i] and i<agent_idx)
+                valuations_c[agent_idx] > valuations_c[i]+1
+                or (valuations_c[agent_idx] + 1 == valuations_c[i] and i<agent_idx) 
             ):
                 # Run exchange path
                 print("path update")
