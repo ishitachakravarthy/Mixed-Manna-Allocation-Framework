@@ -1,9 +1,6 @@
 from agent import Agent
+from algorithm import *
 
-from allocation import *
-from yankee_swap import *
-from pareto_paths import *
-from greedy_algorithm import *
 
 items = []
 desired_items_2 = []
@@ -58,35 +55,8 @@ print(f"Agent 2: ")
 print(f"desired_items_0:{desired_items_0[1]} ")
 print(f"desired_items_c:{desired_items_c[1]} ")
 
-X_0_matr = yankee_swap(agents=agents, items=items)
 
-
-X_c_matr = initialize_allocation_matrix(items, agents)
-X__1_matr = initialize_allocation_matrix(items, agents)
-
-
-# print(f"Xc: {X_c_matr}")
-# print(f"X0: {X_0_matr}")
-# print(f"X__1: {X__1_matr}")
-
-# agents[0] = Agent(id=str(0), cap=100, desired_items=desired_items_c[0])
-# agents[1] = Agent(id=str(1), cap=100, desired_items=desired_items_c[1])
-
-X_c_matr, X_0_matr = yankee_swap_c(
-    agents=agents,
-    items=items,
-    X_c_matr=X_c_matr,
-    X_0_matr=X_0_matr,
-    c_value=c_value,
-    plot_exchange_graph=False,
-)
-# print(f"Xc: {X_c_matr}")
-# print(f"X0: {X_0_matr}")
-# print(f"X__1: {X__1_matr}")
-
-X_c_matr, X_0_matr, X__1_matr = allocate_remaining_items_matr(
-    agents, c_value, X_c_matr, X_0_matr, X__1_matr
-)
+X_c_matr, X_0_matr, X__1_matr = mixed_manna(agents, items, c_value)
 print("Final allocation:")
 print(f"Xc:\n {X_c_matr}")
 print(f"X0:\n {X_0_matr}")

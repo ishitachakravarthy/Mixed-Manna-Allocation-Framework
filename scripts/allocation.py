@@ -202,34 +202,21 @@ def update_exchange_graph(
     return G
 
 
-def update_path(agents, items, items_wanted, X_c_matr, X_0_matr, G, agent_idx, i):
+def update_path(agents, items, items_wanted, X_c_matr, X_0_matr, G, i,agent_idx):
     # Add new sync node
-    X_c_col = X_c_matr[:][agent_idx]
+    X_c_col = X_c_matr[:,agent_idx]
     X_c_col_flat = X_c_col.flatten()
     items_pos = np.where(X_c_col_flat == 1)[0]
-    print(items_pos)
+
     G.add_node("x")
     for item in items_pos:
-        G.add_edge(item, "x")
+        G.add_edge(items[item], "x")
 
     G.add_node("a")
     for item in items_wanted:
         G.add_edge("a", item)
 
     path = find_shortest_path(G, "a", "x")
-    # Update exchange graph
-    if path == False:
-        print(path)
-        G.remove_node("a")
-        G.remove_node("x")
-        return X_c_matr, X_0_matr, G
-    # else:
-    #     X_c_matr, X_0_matr, agents_involved = update_allocation(
-    #         X_c_matr, X_0_matr, 1, agents, items, path
-    #     )
-    #     G = update_exchange_graph(
-    #             X_c_matr, X_0_matr, 1, G, agents, items, path, agents_involved
-    #         )
 
     if True:
         pos = nx.spring_layout(G, seed=7)
@@ -237,13 +224,41 @@ def update_path(agents, items, items_wanted, X_c_matr, X_0_matr, G, agent_idx, i
         edge_labels = nx.get_edge_attributes(G, "weight")
         nx.draw_networkx_edge_labels(G, pos, edge_labels)
         plt.show()
+    # Update exchange graph
+    if path == False:
+        G.remove_node("a")
+        G.remove_node("x")
+        return X_c_matr, X_0_matr, G,False
+    else:
+        print(X_c_matr,X_0_matr)
+        X_c_matr, X_0_matr, agents_involved = update_allocation_swap(
+            X_c_matr,
+            X_0_matr,
+            agents,
+            items,
+            path,
+            i,
+            agent_idx
+        )
+        print(X_c_matr, X_0_matr, agents_involved)
+        G = update_exchange_graph(
+            X_c_matr,
+            X_0_matr,
+            G,
+            agents,
+            items,
+            path,
+            agents_involved,
+            1,
+        )
+        G.remove_node("a")
+        G.remove_node("x")
+        return X_c_matr, X_0_matr, G,True
 
-    G.remove_node("a")
-    G.remove_node("x")
     return X_c_matr, X_0_matr, G
 
 
-def path_augmentation(agents, items, X_c_matr, X_0_matr, G):
+def path_augmentation(agents, items, X_c_matr, X_0_matr, G,c_value):
     if True:
         pos = nx.spring_layout(G, seed=7)
         nx.draw(G, pos, with_labels=True)
@@ -251,24 +266,83 @@ def path_augmentation(agents, items, X_c_matr, X_0_matr, G):
         nx.draw_networkx_edge_labels(G, pos, edge_labels)
         plt.show()
     valuations_c = 2 * np.sum(X_c_matr, axis=0)[:-1]
+    update=False
     for i in range(len(agents)):
         # find bundle of items wanted
         items_wanted = set()
         agent = agents[i]
         bundle = [items[index] for index, i in enumerate(X_c_matr[:, i]) if i != 0]
         for g in items:
-            if g not in bundle and agents[i].marginal_contribution(bundle, g) == 2:
+            if (
+                g not in bundle
+                and agents[i].marginal_contribution(bundle, g) == c_value
+            ):
                 items_wanted.add(g)
-        # print(i, X_c_matr,items_wanted)
+        # print(i, X_c_matr, items_wanted)
         # print(valuations_c)
         for item in items_wanted:
             item_idx = items.index(item)
             agent_with_item_arr = X_c_matr[item_idx][:-1]
             agent_idx = np.where(agent_with_item_arr == 1)[0][0]
-            if valuations_c[agent_idx] + 1 > valuations_c[i]:
+            # print(i, agent_idx)
+            if (
+                valuations_c[agent_idx] + 1 > valuations_c[i]
+                or (valuations_c[agent_idx] + 1 == valuations_c[i] and i<agent_idx)
+            ):
                 # Run exchange path
-                X_c_matr, X_0_matr, G = update_path(
-                    agents, items, items_wanted, X_c_matr, X_0_matr, G, agent_idx, i
+                print("path update")
+                X_c_matr, X_0_matr, G,flag = update_path(
+                     agents, items, items_wanted, X_c_matr, X_0_matr, G, i, agent_idx
                 )
+                update=True
+                if flag==True:
+                    return X_c_matr, X_0_matr, G, update
 
-    return X_c_matr, X_0_matr, G
+    return X_c_matr, X_0_matr, G, update
+
+
+def update_allocation_swap(
+    X: type[np.ndarray],
+    X_0_matr: type[np.ndarray],
+    agents: list[Agent],
+    items: list[str],
+    path_og: list[int],
+    agent_picked: int,
+    agent_idx
+):
+    """Update allocation matrix.
+
+    Execute the transfer path found, updating the allocation of items accordingly
+
+    Args:
+        X (type[np.ndarray]): allocation matrix
+        agents (list[Agent]): List of agents from class Agent
+        items (list[str]): List of items
+        path_og (list[str]): shortest path, list of items
+        agent_picked (int): index of the agent currently playing
+        c_value (int): Value of c for goods
+
+    Returns:
+        X (type[np.ndarray]): updated allocation matrix
+        X_0_matr (type[np.ndarray]): updated allocation matrix of 0 valued items
+        agents_involved (list[int]): indices of the agents involved in the transfer path
+    """
+    path = path_og.copy()
+    path = path[1:-1]
+    last_item = items.index(path[-1])
+    agents_involved = [agent_picked]
+    X[last_item, agent_idx] -= 1
+
+    while len(path) > 0:
+        last_item = items.index(path.pop(len(path) - 1))
+        if len(path) > 0:
+            next_to_last_item = items.index(path[-1])
+            current_agent = [
+                index for index, i in enumerate(X[next_to_last_item]) if i == 1
+            ][0]
+            agents_involved.append(current_agent)
+            X[last_item, current_agent] = 1
+            X[next_to_last_item, current_agent] = 0
+        else:
+            X[last_item, agent_picked] = 1
+    return X, X_0_matr, agents_involved

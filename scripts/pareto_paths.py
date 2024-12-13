@@ -5,10 +5,10 @@ import matplotlib.pyplot as plt
 from allocation import *
 
 
-
 def yankee_swap_c(
     agents: list[Agent],
     items: list[str],
+    G,
     X_c_matr: type[np.ndarray],
     X_0_matr: type[np.ndarray],
     c_value: int,
@@ -31,13 +31,16 @@ def yankee_swap_c(
     N = len(items)
     M = len(agents)
     players = list(range(M))
-    G = initialize_exchange_graph(items)
     utility_vector = np.zeros([M])
     count = 0
+    update=False
     while len(players) > 0:
         print("Iteration: %d" % count, end="\r")
         count += 1
-        agent_picked = np.argmin(utility_vector)
+        # Use players[0] for running 2B and 2C
+        agent_picked = players[0]
+        # agent_picked = np.argmin(utility_vector)
+
         G = add_agent_to_exchange_graph(
             X_c_matr,
             G,
@@ -55,11 +58,12 @@ def yankee_swap_c(
 
         path = find_shortest_path(G, "s", "t")
         G.remove_node("s")
-        
+
         if path == False:
             players.remove(agent_picked)
             utility_vector[agent_picked] = float("inf")
         else:
+            update=True
             X_c_matr, X_0_matr, agents_involved = update_allocation(
                 X_c_matr,
                 X_0_matr,
@@ -86,5 +90,4 @@ def yankee_swap_c(
                 edge_labels = nx.get_edge_attributes(G, "weight")
                 nx.draw_networkx_edge_labels(G, pos, edge_labels)
                 plt.show()
-    X_c_matr, X_0_matr, G = path_augmentation(agents, items, X_c_matr, X_0_matr, G)
-    return X_c_matr, X_0_matr
+    return X_c_matr, X_0_matr, G, update
